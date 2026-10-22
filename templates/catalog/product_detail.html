@@ -1,31 +1,45 @@
 {% extends "base.html" %}
-{% load shop %}
+{% load static shop %}
 {% block title %}{{ product.name }} - {{ site.store_name }}{% endblock %}
 {% block description %}{{ product.description|truncatechars:150|default:product.name }}{% endblock %}
 {% block og_type %}product{% endblock %}
 {% block og_title %}{{ product.name }} - {{ site.store_name }}{% endblock %}
 {% block og_description %}{{ product.description|truncatechars:150|default:product.name }}{% endblock %}
-{% block og_image %}{{ og_image }}{% endblock %}
+{% block og_image %}{% if og_image %}{{ og_image }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/congopixel-logo.png' %}{% endif %}{% endblock %}
 {% block head_extra %}<script type="application/ld+json">{{ jsonld|safe }}</script>{% endblock %}
+{% block body_class %}{% if available_variants %}has-sticky-buy{% endif %}{% endblock %}
 {% block content %}
 <p class="muted"><a href="{% url 'catalog:home' %}">Accueil</a> › <a href="{% url 'catalog:category' product.category.slug %}">{{ product.category.name }}</a> › {{ product.name }}</p>
 <section class="detail">
   <div class="gallery">
-    {% for img in product.images.all %}<img src="{{ img.image.url }}" alt="{{ img.alt|default:product.name }}"{% if not forloop.first %} loading="lazy"{% endif %}>{% empty %}<div class="noimg">Photo à venir</div>{% endfor %}
+    {% with first=product.images.all.0 %}
+      {% if first %}
+        <img id="main-img" class="gallery-main" src="{{ first.image.url }}" alt="{{ first.alt|default:product.name }}">
+        {% if product.images.all|length > 1 %}
+        <div class="thumbs">{% for img in product.images.all %}<a href="{{ img.image.url }}" data-thumb{% if forloop.first %} class="active"{% endif %}><img src="{{ img.list_url }}" alt="{{ img.alt|default:product.name }}" loading="lazy"></a>{% endfor %}</div>
+        {% endif %}
+      {% else %}
+        <div class="noimg">Photo à venir</div>
+      {% endif %}
+    {% endwith %}
   </div>
   <div>
     <h1>{{ product.name }}</h1>
     <p class="price big"><strong>{{ product.price_usd|usd }}</strong><span class="cdf">{{ product.price_usd|cdf }}</span>{% if product.has_discount %}<s>{{ product.old_price_usd|usd }}</s>{% endif %}</p>
 
     {% if available_variants %}
-    <form method="post" action="{% url 'cart:add' %}" class="buy-box">
+    <form method="post" action="{% url 'cart:add' %}" class="buy-box" id="buy-form" data-loading data-busy-text="Ajout…">
       {% csrf_token %}
       <label for="variant">Variante</label>
       <select name="variant_id" id="variant">
-        {% for v in available_variants %}<option value="{{ v.pk }}">{{ v.name }}{% if v.stock <= 3 %} - plus que {{ v.stock }}{% endif %}</option>{% endfor %}
+        {% for v in available_variants %}<option value="{{ v.pk }}" data-stock="{{ v.stock }}">{{ v.name }}{% if v.stock <= 3 %} - plus que {{ v.stock }}{% endif %}</option>{% endfor %}
       </select>
       <label for="qty">Quantité</label>
-      <input type="number" name="quantity" id="qty" value="1" min="1" max="10">
+      <div class="qty" data-qty>
+        <button type="button" data-step="-1" aria-label="Moins">−</button>
+        <input type="number" name="quantity" id="qty" value="1" min="1" max="10" inputmode="numeric">
+        <button type="button" data-step="1" aria-label="Plus">+</button>
+      </div>
       <button class="btn btn-accent" type="submit">Ajouter au panier</button>
     </form>
     {% else %}
@@ -41,5 +55,11 @@
 {% if related %}
 <h2 class="section-title">Dans la même catégorie</h2>
 <div class="grid">{% for product in related %}{% include "catalog/_product_card.html" %}{% endfor %}</div>
+{% endif %}
+{% if available_variants %}
+<div class="sticky-buy">
+  <div><strong>{{ product.price_usd|usd }}</strong><span class="cdf">{{ product.price_usd|cdf }}</span></div>
+  <button class="btn btn-accent" type="submit" form="buy-form">Ajouter au panier</button>
+</div>
 {% endif %}
 {% endblock %}

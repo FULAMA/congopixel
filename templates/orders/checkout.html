@@ -4,7 +4,7 @@
 {% block content %}
 <h1 class="section-title">Finaliser ma commande</h1>
 <div class="checkout">
-  <form method="post" class="form-card">
+  <form method="post" class="form-card" data-loading data-busy-text="Envoi…">
     {% csrf_token %}
     {% if form.non_field_errors %}<div class="error">{{ form.non_field_errors }}</div>{% endif %}
     {% for field in form %}

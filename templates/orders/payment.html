@@ -17,7 +17,7 @@
   <p>3. Saisissez cet ID ci-dessous. Nous vérifions et préparons votre commande.</p>
 </div>
 {% if payment.status == 'rejected' %}<p class="error">Votre précédent paiement n'a pas pu être vérifié. Merci de vérifier l'ID et de le saisir à nouveau.</p>{% endif %}
-<form method="post" class="form-card">
+<form method="post" class="form-card" data-loading data-busy-text="Envoi…">
   {% csrf_token %}
   {% for field in form %}
   <div class="field">

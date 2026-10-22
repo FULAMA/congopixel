@@ -6,6 +6,8 @@ from django.db import models
 from core.models import TimeStampedModel
 from core.utils import usd_to_cdf
 
+from .images import optimize
+
 
 class PixelModel(models.Model):
     name = models.CharField("modèle", max_length=60, unique=True)
@@ -79,6 +81,7 @@ class Product(TimeStampedModel):
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
     image = models.ImageField("image", upload_to="products/%Y/%m/")
+    thumb = models.ImageField("miniature", upload_to="products/thumbs/%Y/%m/", blank=True, editable=False)
     alt = models.CharField("texte alternatif", max_length=160, blank=True)
     position = models.PositiveSmallIntegerField("ordre", default=0)
 
@@ -89,6 +92,15 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"Image de {self.product}"
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.image._committed:
+            optimize(self)
+        super().save(*args, **kwargs)
+
+    @property
+    def list_url(self):
+        return (self.thumb or self.image).url
 
 
 class ProductVariant(models.Model):

@@ -6,7 +6,7 @@
 {% if lines %}
 {% for line in lines %}
 <div class="cart-line">
-  {% with img=line.variant.product.images.all.0 %}{% if img %}<img src="{{ img.image.url }}" alt="">{% else %}<div class="noimg small"></div>{% endif %}{% endwith %}
+  {% with img=line.variant.product.images.all.0 %}{% if img %}<img src="{{ img.list_url }}" alt="">{% else %}<div class="noimg small"></div>{% endif %}{% endwith %}
   <div class="grow">
     <a href="{% url 'catalog:product_detail' line.variant.product.slug %}"><strong>{{ line.variant.product.name }}</strong></a>
     <div class="muted">{{ line.variant.name }} - {{ line.unit_price|usd }}</div>
