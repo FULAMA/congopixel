@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load shop %}
+{% block title %}{{ product.name }} - {{ site.store_name }}{% endblock %}
+{% block description %}{{ product.description|truncatechars:150 }}{% endblock %}
+{% block content %}
+<p class="muted"><a href="{% url 'catalog:home' %}">Accueil</a> › <a href="{% url 'catalog:category' product.category.slug %}">{{ product.category.name }}</a> › {{ product.name }}</p>
+<section class="detail">
+  <div class="gallery">
+    {% for img in product.images.all %}<img src="{{ img.image.url }}" alt="{{ img.alt|default:product.name }}"{% if not forloop.first %} loading="lazy"{% endif %}>{% empty %}<div class="noimg">Photo à venir</div>{% endfor %}
+  </div>
+  <div>
+    <h1>{{ product.name }}</h1>
+    <p class="price big"><strong>{{ product.price_usd|usd }}</strong><span class="cdf">{{ product.price_usd|cdf }}</span>{% if product.has_discount %}<s>{{ product.old_price_usd|usd }}</s>{% endif %}</p>
+    {% if product.variants.all %}
+    <p><strong>Variantes</strong></p>
+    <ul class="variants">
+      {% for v in product.variants.all %}{% if v.is_active %}<li{% if not v.in_stock %} class="out"{% endif %}>{{ v.name }}{% if not v.in_stock %} (épuisé){% endif %}</li>{% endif %}{% endfor %}
+    </ul>
+    {% endif %}
+    {% if product.is_universal %}<p>✔ Compatible avec tous les smartphones.</p>{% endif %}
+    {% with models=product.compatible_models.all %}{% if models %}<p>✔ Compatible : {% for m in models %}{{ m.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}{% endwith %}
+    {% if whatsapp_url %}<p><a class="btn btn-whatsapp" href="{{ whatsapp_url }}">Commander via WhatsApp</a></p>{% endif %}
+    {% if product.description %}<h2>Description</h2><p>{{ product.description|linebreaksbr }}</p>{% endif %}
+  </div>
+</section>
+{% if related %}
+<h2 class="section-title">Dans la même catégorie</h2>
+<div class="grid">{% for product in related %}{% include "catalog/_product_card.html" %}{% endfor %}</div>
+{% endif %}
+{% endblock %}

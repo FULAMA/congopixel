@@ -1,0 +1,8 @@
+<form class="pixel-picker" method="get" action="{% url 'catalog:product_list' %}">
+  <label for="pixel">Mon Pixel</label>
+  <select name="pixel" id="pixel">
+    <option value="">Tous les modèles</option>
+    {% for m in pixel_models %}<option value="{{ m.slug }}"{% if m.slug == selected_pixel_slug %} selected{% endif %}>{{ m.name }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="btn btn-accent">Voir les accessoires</button>
+</form>

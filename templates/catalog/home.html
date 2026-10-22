@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Les accessoires faits pour votre Google Pixel</h1>
+  <p>Coques, chargeurs, écouteurs… Livraison à Kinshasa et dans tout le Kongo Central.</p>
+  {% include "catalog/_pixel_picker.html" %}
+</section>
+
+{% if featured %}
+<h2 class="section-title">Nos coups de cœur</h2>
+<div class="grid">{% for product in featured %}{% include "catalog/_product_card.html" %}{% endfor %}</div>
+{% endif %}
+
+<h2 class="section-title">Nouveautés</h2>
+{% if latest %}
+<div class="grid">{% for product in latest %}{% include "catalog/_product_card.html" %}{% endfor %}</div>
+{% else %}
+<p class="muted">Les premiers produits arrivent bientôt.</p>
+{% endif %}
+{% endblock %}

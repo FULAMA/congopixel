@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{% if category %}{{ category.name }}{% else %}Boutique{% endif %} - {{ site.store_name }}{% endblock %}
+{% block content %}
+<h1 class="section-title">{% if category %}{{ category.name }}{% else %}Tous les accessoires{% endif %}</h1>
+{% include "catalog/_pixel_picker.html" %}
+{% if selected_pixel %}<p class="muted">Accessoires compatibles avec <strong>{{ selected_pixel.name }}</strong> (et produits universels).</p>{% endif %}
+{% if query %}<p class="muted">Résultats pour « {{ query }} »</p>{% endif %}
+
+{% if page.object_list %}
+<div class="grid">{% for product in page %}{% include "catalog/_product_card.html" %}{% endfor %}</div>
+<div class="pagination">
+  {% if page.has_previous %}<a class="chip" href="?page={{ page.previous_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}">← Précédent</a>{% endif %}
+  <span class="muted">Page {{ page.number }} sur {{ page.paginator.num_pages }}</span>
+  {% if page.has_next %}<a class="chip" href="?page={{ page.next_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}">Suivant →</a>{% endif %}
+</div>
+{% else %}
+<p class="muted">Aucun produit ne correspond pour le moment.</p>
+{% endif %}
+{% endblock %}

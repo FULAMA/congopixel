@@ -1,0 +1,10 @@
+{% load shop %}
+<article class="card">
+  <a href="{% url 'catalog:product_detail' product.slug %}">
+    {% with img=product.images.all.0 %}
+      {% if img %}<img src="{{ img.image.url }}" alt="{{ img.alt|default:product.name }}" loading="lazy">{% else %}<div class="noimg">Photo à venir</div>{% endif %}
+    {% endwith %}
+    <h3>{{ product.name }}</h3>
+  </a>
+  <p class="price"><strong>{{ product.price_usd|usd }}</strong><span class="cdf">{{ product.price_usd|cdf }}</span>{% if product.has_discount %}<s>{{ product.old_price_usd|usd }}</s>{% endif %}</p>
+</article>
