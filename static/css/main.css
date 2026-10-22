@@ -117,3 +117,5 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .js .reveal{opacity:1;transform:none}
 }
 .empty-state{text-align:center;padding:3rem 1rem}.empty-state h1{color:var(--blue)}
+
+.qr{border:1px solid var(--line);border-radius:12px;background:#fff;padding:.5rem;max-width:100%;height:auto}

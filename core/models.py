@@ -20,6 +20,8 @@ class SiteSettings(models.Model):
     )
     orange_money_number = models.CharField("numéro Orange Money", max_length=20, blank=True)
     mpesa_number = models.CharField("numéro M-Pesa", max_length=20, blank=True)
+    orange_qr_image = models.ImageField("code QR Orange Money / Max it", upload_to="qr/", blank=True, help_text="Image du code QR marchand fournie par Orange (facultatif).")
+    mpesa_qr_image = models.ImageField("code QR M-Pesa", upload_to="qr/", blank=True, help_text="Image du code QR marchand fournie par Vodacom (facultatif).")
     usd_to_cdf_rate = models.DecimalField(
         "taux : 1 USD en CDF", max_digits=10, decimal_places=2,
         default=Decimal("2800.00"), validators=[MinValueValidator(Decimal("1"))],

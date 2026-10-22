@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 from django.contrib import messages
 from django.core.cache import cache
@@ -15,7 +16,7 @@ from payments.models import Payment
 from .access import can_view_order, remember_order
 from .forms import CheckoutForm
 from .models import Order
-from .services import StockError, create_order, expire_stale_orders
+from .services import StockError, expire_stale_orders, place_order
 
 logger = logging.getLogger("congopixel")
 LIMIT_MESSAGE = "Trop de demandes en peu de temps. Réessayez dans un moment ou écrivez-nous sur WhatsApp."
@@ -31,9 +32,32 @@ def _get_order_or_404(request, reference):
     return order
 
 
+def _after_checkout(order):
+    payment = order.payments.order_by("id").first()
+    if payment is not None and payment.method != Payment.Method.CASH_ON_DELIVERY:
+        return redirect("orders:payment", reference=order.reference)
+    return redirect("orders:detail", reference=order.reference)
+
+
+def _replayed_order(request):
+    try:
+        key = uuid.UUID(request.POST.get("idempotency_key", ""))
+    except ValueError:
+        return None
+    order = Order.objects.filter(idempotency_key=key).first()
+    if order is not None and can_view_order(request, order):
+        return order
+    return None
+
+
 def checkout(request):
     if cache.add("expire_orders_check", 1, 600):
         expire_stale_orders()
+
+    if request.method == "POST":
+        replay = _replayed_order(request)
+        if replay is not None:
+            return _after_checkout(replay)
 
     cart = Cart(request)
     lines = cart.lines()
@@ -41,13 +65,13 @@ def checkout(request):
         messages.info(request, "Votre panier est vide.")
         return redirect("cart:detail")
 
-    initial = {}
+    initial = {"idempotency_key": uuid.uuid4()}
     if request.user.is_authenticated:
-        initial = {
+        initial.update({
             "full_name": request.user.get_full_name(),
             "phone": request.user.phone or "",
             "email": request.user.email,
-        }
+        })
     form = CheckoutForm(request.POST or None, initial=initial)
 
     if request.method == "POST" and form.is_valid():
@@ -56,19 +80,21 @@ def checkout(request):
             return redirect("cart:detail")
         method = form.cleaned_data["payment_method"]
         try:
-            order = create_order(
+            order, created = place_order(
                 cart, form.cleaned_data, method,
                 user=request.user if request.user.is_authenticated else None,
+                idempotency_key=form.cleaned_data.get("idempotency_key"),
             )
         except StockError as exc:
             messages.error(request, str(exc))
             return redirect("cart:detail")
+        if not created and not can_view_order(request, order):
+            raise Http404
         cart.clear()
         remember_order(request, order)
-        if method == Payment.Method.CASH_ON_DELIVERY:
+        if created and method == Payment.Method.CASH_ON_DELIVERY:
             messages.success(request, "Commande enregistrée. Nous vous appelons pour la confirmer.")
-            return redirect("orders:detail", reference=order.reference)
-        return redirect("orders:payment", reference=order.reference)
+        return _after_checkout(order)
 
     return render(request, "orders/checkout.html", {"form": form, "cart_lines": lines, "subtotal": cart.subtotal})
 
@@ -98,8 +124,11 @@ def order_payment(request, reference):
     site_settings = SiteSettings.load()
     if payment.method == Payment.Method.ORANGE_MONEY:
         pay_number = site_settings.orange_money_number
+        qr_field = site_settings.orange_qr_image
     else:
         pay_number = site_settings.mpesa_number
+        qr_field = site_settings.mpesa_qr_image
+    qr_url = qr_field.url if qr_field else ""
 
     awaiting_proof = (not payment.transaction_id) or payment.status == Payment.Status.REJECTED
     form = None
@@ -124,5 +153,5 @@ def order_payment(request, reference):
                 messages.success(request, "Merci ! Nous vérifions votre paiement et vous contactons très vite.")
                 return redirect("orders:detail", reference=order.reference)
 
-    context = {"order": order, "payment": payment, "pay_number": pay_number, "form": form}
+    context = {"order": order, "payment": payment, "pay_number": pay_number, "qr_url": qr_url, "form": form}
     return render(request, "orders/payment.html", context)

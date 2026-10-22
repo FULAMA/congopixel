@@ -43,3 +43,24 @@ class Payment(TimeStampedModel):
 
     def __str__(self):
         return f"{self.order.reference} - {self.get_method_display()}"
+
+class PaymentEvent(models.Model):
+    """Journal des notifications d'un fournisseur de paiement (protection contre le rejeu)."""
+
+    provider = models.CharField("fournisseur", max_length=30)
+    event_id = models.CharField("identifiant de l'événement", max_length=100)
+    order_reference = models.CharField("référence de commande", max_length=20, blank=True)
+    success = models.BooleanField("succès annoncé", default=False)
+    outcome = models.CharField("résultat du traitement", max_length=30, blank=True)
+    created_at = models.DateTimeField("reçu le", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "notification de paiement"
+        verbose_name_plural = "notifications de paiement"
+        constraints = [
+            models.UniqueConstraint(fields=["provider", "event_id"], name="unique_provider_event")
+        ]
+
+    def __str__(self):
+        return f"{self.provider}:{self.event_id}"

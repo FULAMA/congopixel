@@ -3,7 +3,7 @@ from datetime import timedelta
 from decimal import Decimal
 
 from django.conf import settings
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.utils import timezone
 
@@ -21,7 +21,7 @@ class StockError(Exception):
 
 
 @transaction.atomic
-def create_order(cart, data, payment_method, user=None):
+def create_order(cart, data, payment_method, user=None, idempotency_key=None):
     lines = cart.lines()
     if not lines:
         raise StockError("Votre panier est vide.")
@@ -55,6 +55,7 @@ def create_order(cart, data, payment_method, user=None):
         shipping_usd=zone.fee_usd,
         total_usd=subtotal + zone.fee_usd,
         exchange_rate=get_rate(),
+        idempotency_key=idempotency_key,
     )
     OrderItem.objects.bulk_create([
         OrderItem(
@@ -68,6 +69,23 @@ def create_order(cart, data, payment_method, user=None):
     Payment.objects.create(order=order, method=payment_method, amount_usd=order.total_usd)
     logger.info("Commande créée %s (%s USD, paiement %s)", order.reference, order.total_usd, payment_method)
     return order
+
+
+def place_order(cart, data, payment_method, user=None, idempotency_key=None):
+    """Crée la commande une seule fois par clé d'idempotence. Retourne (commande, créée)."""
+    if idempotency_key:
+        existing = Order.objects.filter(idempotency_key=idempotency_key).first()
+        if existing is not None:
+            return existing, False
+    try:
+        order = create_order(cart, data, payment_method, user=user, idempotency_key=idempotency_key)
+        return order, True
+    except IntegrityError:
+        if idempotency_key:
+            existing = Order.objects.filter(idempotency_key=idempotency_key).first()
+            if existing is not None:
+                return existing, False
+        raise
 
 
 @transaction.atomic

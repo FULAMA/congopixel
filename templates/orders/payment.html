@@ -10,6 +10,7 @@
   {% if pay_number %}
   <p>1. Avec l'application {{ payment.get_method_display }}, envoyez le montant (en dollars, ou son équivalent en FC) au numéro :</p>
   <p class="number">{{ pay_number }}</p>
+  {% if qr_url %}<p>Vous pouvez aussi scanner ce code QR avec {% if payment.method == 'orange_money' %}<strong>Max it</strong> ou Orange Money{% else %}<strong>M-Pesa</strong>{% endif %} :</p><p><img class="qr" src="{{ qr_url }}" alt="Code QR de paiement" width="220" height="220"></p><p class="muted">Saisissez le montant exact indiqué plus haut, puis revenez ici avec votre ID de transaction.</p>{% endif %}
   {% else %}
   <p>Le numéro de paiement n'est pas encore configuré. Contactez-nous sur WhatsApp pour finaliser.</p>
   {% endif %}

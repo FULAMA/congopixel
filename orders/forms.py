@@ -15,6 +15,7 @@ class ZoneChoiceField(forms.ModelChoiceField):
 
 
 class CheckoutForm(forms.ModelForm):
+    idempotency_key = forms.UUIDField(required=False, widget=forms.HiddenInput)
     delivery_zone = ZoneChoiceField(
         queryset=DeliveryZone.objects.filter(is_active=True),
         label="Zone de livraison", empty_label="Choisissez votre zone",
