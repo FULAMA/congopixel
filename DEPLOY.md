@@ -7,18 +7,18 @@ Remplace rien : ton nom PythonAnywhere (FULAMA) et ton compte GitHub (https://gi
 2. Dans PowerShell :
 
     Set-Location C:\Dev\CongoPixel
-    git remote add origin https://github.com/https://github.com/FULAMA/congopixel/congopixel.git
+    git remote add origin https://github.com/FULAMA/congopixel.git
     git branch -M main
     git push -u origin main
 
 Le `.env`, la base, les photos, les sauvegardes et `.env.production` ne partent pas dans Git.
 
 ## 2. Préparer PythonAnywhere
-1. Crée le compte gratuit (nom d'utilisateur : FULAMA). Ton site sera https://FULAMA.pythonanywhere.com
+1. Crée le compte gratuit (nom d'utilisateur : FULAMA). Ton site sera https://fulama.pythonanywhere.com
 2. Onglet Consoles : ouvre une console Bash.
 3. Récupère le code (si le dépôt est privé, PythonAnywhere te demande un identifiant : utilise ton compte GitHub et, comme mot de passe, un jeton d'accès personnel en lecture seule) :
 
-    git clone https://github.com/https://github.com/FULAMA/congopixel/congopixel.git
+    git clone https://github.com/FULAMA/congopixel.git
     cd congopixel
 
 4. Vérifie les versions de Python disponibles, puis crée l'environnement virtuel avec la plus récente (3.12 ou plus ; remplace 3.13 si besoin) :
@@ -30,7 +30,7 @@ Le `.env`, la base, les photos, les sauvegardes et `.env.production` ne partent 
 ## 3. Configuration de production
 1. Sur ton PC, ouvre `.env.production` (Bloc-notes) et copie tout son contenu.
 2. Dans la console PythonAnywhere : `nano .env`, colle le contenu, puis Ctrl+O, Entrée, Ctrl+X.
-3. Note l'adresse secrète de l'admin (ligne ADMIN_URL). Ton admin sera https://FULAMA.pythonanywhere.com/ + cette valeur. Ne la partage qu'avec ton équipe.
+3. Note l'adresse secrète de l'admin (ligne ADMIN_URL). Ton admin sera https://fulama.pythonanywhere.com/ + cette valeur. Ne la partage qu'avec ton équipe.
 
 ## 4. Base de données et fichiers statiques
 
