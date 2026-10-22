@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load shop %}
+{% block title %}Mon compte - {{ site.store_name }}{% endblock %}
+{% block content %}
+<h1 class="section-title">Bonjour {{ user.first_name|default:user.username }}</h1>
+<form method="post" action="{% url 'accounts:logout' %}" class="inline">{% csrf_token %}<button class="chip" type="submit">Se déconnecter</button></form>
+<h2 class="section-title">Mes commandes</h2>
+{% for order in orders %}
+<div class="summary">
+  <a href="{% url 'orders:detail' order.reference %}"><strong>{{ order.reference }}</strong></a>
+  - {{ order.created_at|date:"d/m/Y" }} - <span class="chip">{{ order.get_status_display }}</span>
+  <div>{{ order.total_usd|usd }} <span class="cdf">({{ order.total_cdf|fc }})</span></div>
+</div>
+{% empty %}
+<p class="muted">Vous n'avez pas encore de commande liée à ce compte.</p>
+{% endfor %}
+{% endblock %}

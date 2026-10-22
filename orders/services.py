@@ -61,3 +61,15 @@ def create_order(cart, data, payment_method, user=None):
         ProductVariant.objects.filter(pk=variant.pk).update(stock=F("stock") - quantity)
     Payment.objects.create(order=order, method=payment_method, amount_usd=order.total_usd)
     return order
+
+@transaction.atomic
+def restock_order(order):
+    """Remet en stock les articles d'une commande annulée, une seule fois."""
+    order = Order.objects.select_for_update().get(pk=order.pk)
+    if order.stock_restored:
+        return False
+    for item in order.items.all():
+        ProductVariant.objects.filter(pk=item.variant_id).update(stock=F("stock") + item.quantity)
+    order.stock_restored = True
+    order.save(update_fields=["stock_restored", "updated_at"])
+    return True

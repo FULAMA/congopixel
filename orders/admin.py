@@ -1,6 +1,7 @@
 from django.contrib import admin
 
 from .models import DeliveryZone, Order, OrderItem
+from .services import restock_order
 
 
 class OrderItemInline(admin.TabularInline):
@@ -13,6 +14,17 @@ class OrderItemInline(admin.TabularInline):
         return False
 
 
+@admin.action(description="Annuler les commandes sélectionnées et remettre le stock")
+def cancel_orders(modeladmin, request, queryset):
+    count = 0
+    for order in queryset.exclude(status=Order.Status.DELIVERED):
+        order.status = Order.Status.CANCELLED
+        order.save(update_fields=["status", "updated_at"])
+        if restock_order(order):
+            count += 1
+    modeladmin.message_user(request, f"{count} commande(s) annulée(s), stock remis.")
+
+
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ("reference", "full_name", "phone", "delivery_zone", "total_usd", "status", "created_at")
@@ -20,9 +32,15 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ("reference", "full_name", "phone")
     readonly_fields = (
         "reference", "subtotal_usd", "shipping_usd", "total_usd",
-        "exchange_rate", "created_at", "updated_at",
+        "exchange_rate", "stock_restored", "created_at", "updated_at",
     )
     inlines = [OrderItemInline]
+    actions = [cancel_orders]
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if change and obj.status == Order.Status.CANCELLED and restock_order(obj):
+            self.message_user(request, "Commande annulée : le stock a été remis.")
 
 
 @admin.register(DeliveryZone)

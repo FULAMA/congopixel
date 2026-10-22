@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Créer un compte - {{ site.store_name }}{% endblock %}
+{% block content %}
+<h1 class="section-title">Créer un compte</h1>
+<form method="post" class="form-card">
+  {% csrf_token %}
+  <input type="hidden" name="next" value="{{ next }}">
+  {% for field in form %}
+  <div class="field">
+    {{ field.label_tag }}
+    {{ field }}
+    {% for e in field.errors %}<div class="error">{{ e }}</div>{% endfor %}
+  </div>
+  {% endfor %}
+  <button class="btn btn-accent" type="submit">Créer mon compte</button>
+</form>
+<p>Déjà inscrit ? <a href="{% url 'accounts:login' %}">Se connecter</a></p>
+{% endblock %}

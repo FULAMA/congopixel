@@ -56,6 +56,7 @@ class Order(TimeStampedModel):
     shipping_usd = models.DecimalField("livraison (USD)", max_digits=10, decimal_places=2, default=Decimal("0.00"))
     total_usd = models.DecimalField("total (USD)", max_digits=10, decimal_places=2, default=Decimal("0.00"))
     exchange_rate = models.DecimalField("taux USD/CDF figé", max_digits=10, decimal_places=2, default=Decimal("0.00"))
+    stock_restored = models.BooleanField("stock remis", default=False, editable=False)
 
     class Meta:
         ordering = ["-created_at"]
