@@ -7,3 +7,5 @@ media/
 staticfiles/
 
 backups/
+
+.env.production
