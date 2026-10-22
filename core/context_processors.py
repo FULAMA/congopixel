@@ -1,5 +1,6 @@
 import re
 
+from cart.cart import Cart
 from catalog.models import Category, PixelModel
 from core.models import SiteSettings
 
@@ -12,4 +13,5 @@ def site(request):
         "nav_categories": Category.objects.filter(is_active=True),
         "pixel_models": PixelModel.objects.filter(is_active=True),
         "selected_pixel_slug": request.session.get("pixel", ""),
+        "cart_count": Cart(request).count,
     }

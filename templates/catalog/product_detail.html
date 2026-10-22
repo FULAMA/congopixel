@@ -11,15 +11,25 @@
   <div>
     <h1>{{ product.name }}</h1>
     <p class="price big"><strong>{{ product.price_usd|usd }}</strong><span class="cdf">{{ product.price_usd|cdf }}</span>{% if product.has_discount %}<s>{{ product.old_price_usd|usd }}</s>{% endif %}</p>
-    {% if product.variants.all %}
-    <p><strong>Variantes</strong></p>
-    <ul class="variants">
-      {% for v in product.variants.all %}{% if v.is_active %}<li{% if not v.in_stock %} class="out"{% endif %}>{{ v.name }}{% if not v.in_stock %} (épuisé){% endif %}</li>{% endif %}{% endfor %}
-    </ul>
+
+    {% if available_variants %}
+    <form method="post" action="{% url 'cart:add' %}" class="buy-box">
+      {% csrf_token %}
+      <label for="variant">Variante</label>
+      <select name="variant_id" id="variant">
+        {% for v in available_variants %}<option value="{{ v.pk }}">{{ v.name }}{% if v.stock <= 3 %} - plus que {{ v.stock }}{% endif %}</option>{% endfor %}
+      </select>
+      <label for="qty">Quantité</label>
+      <input type="number" name="quantity" id="qty" value="1" min="1" max="10">
+      <button class="btn btn-accent" type="submit">Ajouter au panier</button>
+    </form>
+    {% else %}
+    <p class="msg">Produit momentanément épuisé.</p>
     {% endif %}
+
     {% if product.is_universal %}<p>✔ Compatible avec tous les smartphones.</p>{% endif %}
     {% with models=product.compatible_models.all %}{% if models %}<p>✔ Compatible : {% for m in models %}{{ m.name }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endif %}{% endwith %}
-    {% if whatsapp_url %}<p><a class="btn btn-whatsapp" href="{{ whatsapp_url }}">Commander via WhatsApp</a></p>{% endif %}
+    {% if whatsapp_url %}<p><a class="btn btn-whatsapp" href="{{ whatsapp_url }}">Poser une question sur WhatsApp</a></p>{% endif %}
     {% if product.description %}<h2>Description</h2><p>{{ product.description|linebreaksbr }}</p>{% endif %}
   </div>
 </section>

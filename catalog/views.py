@@ -67,5 +67,6 @@ def product_detail(request, slug):
     if number:
         text = f"Bonjour CongoPixel, je suis intéressé par : {product.name} - {request.build_absolute_uri()}"
         whatsapp_url = f"https://wa.me/{number}?text={quote(text)}"
-    context = {"product": product, "related": related, "whatsapp_url": whatsapp_url}
+    available_variants = [v for v in product.variants.all() if v.in_stock]
+    context = {"product": product, "related": related, "whatsapp_url": whatsapp_url, "available_variants": available_variants}
     return render(request, "catalog/product_detail.html", context)

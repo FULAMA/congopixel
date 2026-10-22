@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load shop %}
+{% block title %}Commande {{ order.reference }} - {{ site.store_name }}{% endblock %}
+{% block content %}
+<h1 class="section-title">Commande {{ order.reference }}</h1>
+<p><span class="chip active">{{ order.get_status_display }}</span></p>
+
+<div class="summary">
+  <h2>Articles</h2>
+  <ul>{% for item in order.items.all %}<li>{{ item.quantity }} × {{ item.product_name }} ({{ item.variant_name }}) - {{ item.line_total_usd|usd }}</li>{% endfor %}</ul>
+  <p>Sous-total : {{ order.subtotal_usd|usd }}<br>Livraison ({{ order.delivery_zone.name }}) : {{ order.shipping_usd|usd }}<br>
+  <strong>Total : {{ order.total_usd|usd }}</strong> <span class="cdf">({{ order.total_cdf|fc }})</span></p>
+  <h2>Livraison</h2>
+  <p>{{ order.full_name }} - {{ order.phone }}<br>{{ order.address }}, {{ order.city }}</p>
+  <h2>Paiement</h2>
+  {% for p in order.payments.all %}<p>{{ p.get_method_display }} - {{ p.get_status_display }}{% if p.transaction_id %} (ID : {{ p.transaction_id }}){% endif %}</p>{% endfor %}
+</div>
+
+{% for p in order.payments.all %}{% if p.method != 'cash_on_delivery' and p.status != 'confirmed' and not p.transaction_id %}
+<p><a class="btn btn-accent" href="{% url 'orders:payment' order.reference %}">Payer maintenant</a></p>
+{% endif %}{% endfor %}
+{% if whatsapp_digits %}<p><a class="btn btn-whatsapp" href="https://wa.me/{{ whatsapp_digits }}?text=Bonjour%2C%20commande%20{{ order.reference }}">Nous écrire sur WhatsApp</a></p>{% endif %}
+{% endblock %}

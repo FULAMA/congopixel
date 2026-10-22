@@ -46,3 +46,21 @@ a{color:var(--blue);text-decoration:none}
 .muted{color:var(--muted)}
 .site-footer{margin-top:3rem;background:var(--blue);color:#fff;padding:1.5rem 0;font-size:.92rem}
 .site-footer a{color:#fff;text-decoration:underline}
+.msg{padding:.7rem 1rem;border-radius:10px;margin:.8rem 0;background:var(--blue-soft)}
+.msg.success{background:#DCFCE7}.msg.error{background:#FEE2E2}
+.form-card{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:1.1rem;margin:1rem 0}
+.field{margin-bottom:.9rem}.field label{display:block;font-weight:600;margin-bottom:.25rem}
+.form-card input[type=text],.form-card input[type=tel],.form-card input[type=email],.form-card input[type=number],.form-card select,.form-card textarea{width:100%;padding:.6rem .8rem;border:1px solid var(--line);border-radius:10px;font-size:1rem;font-family:inherit}
+.error{color:#B91C1C;font-size:.9rem}
+.checkout{display:grid;gap:1.25rem}
+@media(min-width:900px){.checkout{grid-template-columns:2fr 1fr;align-items:start}}
+.summary{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:1rem;margin-bottom:1rem}.summary ul{padding-left:1.1rem}
+.cart-line{display:flex;gap:.8rem;background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:.7rem;margin-bottom:.7rem;align-items:flex-start}
+.cart-line img,.noimg.small{width:72px;height:72px;object-fit:cover;border-radius:10px;flex:none}
+.grow{flex:1}.line-total{text-align:right}
+.inline{display:inline-block;margin:.3rem .3rem 0 0}.inline input[type=number]{width:70px;padding:.3rem;border:1px solid var(--line);border-radius:8px}
+.cart-total{font-size:1.15rem}
+.buy-box{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:1rem;margin:1rem 0;display:grid;gap:.5rem}
+.buy-box select,.buy-box input{padding:.55rem .7rem;border:1px solid var(--line);border-radius:10px;font-size:1rem}
+.steps{background:var(--blue-soft);border-radius:var(--radius);padding:1rem 1.25rem;margin:1rem 0}
+.number{font-size:1.4rem;font-weight:800;color:var(--blue)}

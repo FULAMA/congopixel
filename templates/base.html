@@ -17,6 +17,7 @@
       <input type="search" name="q" placeholder="Rechercher un accessoire…" value="{{ request.GET.q }}" aria-label="Rechercher">
       <button type="submit">Rechercher</button>
     </form>
+    <a class="btn btn-accent" href="{% url 'cart:detail' %}">Panier ({{ cart_count }})</a>
   </div>
   <nav class="container nav-row" aria-label="Catégories">
     <a href="{% url 'catalog:product_list' %}">Tout voir</a>
@@ -24,6 +25,7 @@
   </nav>
 </header>
 <main class="container">
+  {% if messages %}{% for m in messages %}<div class="msg {{ m.tags }}">{{ m }}</div>{% endfor %}{% endif %}
   {% block content %}{% endblock %}
 </main>
 <footer class="site-footer">

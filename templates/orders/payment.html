@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load shop %}
+{% block title %}Paiement - {{ site.store_name }}{% endblock %}
+{% block content %}
+<h1 class="section-title">Paiement {{ payment.get_method_display }}</h1>
+<p>Commande <strong>{{ order.reference }}</strong> - montant à payer : <strong>{{ order.total_usd|usd }}</strong> <span class="cdf">({{ order.total_cdf|fc }})</span></p>
+
+{% if form %}
+<div class="steps">
+  {% if pay_number %}
+  <p>1. Avec l'application {{ payment.get_method_display }}, envoyez le montant (en dollars, ou son équivalent en FC) au numéro :</p>
+  <p class="number">{{ pay_number }}</p>
+  {% else %}
+  <p>Le numéro de paiement n'est pas encore configuré. Contactez-nous sur WhatsApp pour finaliser.</p>
+  {% endif %}
+  <p>2. Vous recevez un SMS de confirmation avec un <strong>ID de transaction</strong>.</p>
+  <p>3. Saisissez cet ID ci-dessous. Nous vérifions et préparons votre commande.</p>
+</div>
+{% if payment.status == 'rejected' %}<p class="error">Votre précédent paiement n'a pas pu être vérifié. Merci de vérifier l'ID et de le saisir à nouveau.</p>{% endif %}
+<form method="post" class="form-card">
+  {% csrf_token %}
+  {% for field in form %}
+  <div class="field">
+    {{ field.label_tag }}
+    {{ field }}
+    {% if field.help_text %}<small class="muted">{{ field.help_text }}</small>{% endif %}
+    {% for e in field.errors %}<div class="error">{{ e }}</div>{% endfor %}
+  </div>
+  {% endfor %}
+  <button class="btn btn-accent" type="submit">J'ai payé, envoyer</button>
+</form>
+{% else %}
+<p class="msg">Nous avons bien reçu votre ID de transaction et nous vérifions votre paiement.</p>
+<a class="btn" href="{% url 'orders:detail' order.reference %}">Suivre ma commande</a>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load shop %}
+{% block title %}Mon panier - {{ site.store_name }}{% endblock %}
+{% block content %}
+<h1 class="section-title">Mon panier</h1>
+{% if lines %}
+{% for line in lines %}
+<div class="cart-line">
+  {% with img=line.variant.product.images.all.0 %}{% if img %}<img src="{{ img.image.url }}" alt="">{% else %}<div class="noimg small"></div>{% endif %}{% endwith %}
+  <div class="grow">
+    <a href="{% url 'catalog:product_detail' line.variant.product.slug %}"><strong>{{ line.variant.product.name }}</strong></a>
+    <div class="muted">{{ line.variant.name }} - {{ line.unit_price|usd }}</div>
+    <form method="post" action="{% url 'cart:update' %}" class="inline">{% csrf_token %}
+      <input type="hidden" name="variant_id" value="{{ line.variant.pk }}">
+      <input type="number" name="quantity" value="{{ line.quantity }}" min="1" max="10" aria-label="Quantité">
+      <button class="chip" type="submit">Mettre à jour</button>
+    </form>
+    <form method="post" action="{% url 'cart:remove' %}" class="inline">{% csrf_token %}
+      <input type="hidden" name="variant_id" value="{{ line.variant.pk }}">
+      <button class="chip" type="submit">Retirer</button>
+    </form>
+  </div>
+  <div class="line-total"><strong>{{ line.total|usd }}</strong><br><span class="cdf">{{ line.total|cdf }}</span></div>
+</div>
+{% endfor %}
+<p class="cart-total">Sous-total : <strong>{{ subtotal|usd }}</strong> <span class="cdf">{{ subtotal|cdf }}</span></p>
+<p class="muted">Les frais de livraison sont calculés à l'étape suivante.</p>
+<a class="btn btn-accent" href="{% url 'orders:checkout' %}">Passer la commande</a>
+{% else %}
+<p class="muted">Votre panier est vide.</p>
+<a class="btn" href="{% url 'catalog:product_list' %}">Voir les accessoires</a>
+{% endif %}
+{% endblock %}
