@@ -1,3 +1,4 @@
+import json
 import re
 from urllib.parse import quote
 
@@ -16,6 +17,11 @@ def _active_products():
         .select_related("category")
         .prefetch_related("images", "variants")
     )
+
+
+def _jsonld_escape(data):
+    text = json.dumps(data, ensure_ascii=False)
+    return text.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
 
 
 def home(request):
@@ -68,5 +74,31 @@ def product_detail(request, slug):
         text = f"Bonjour CongoPixel, je suis intéressé par : {product.name} - {request.build_absolute_uri()}"
         whatsapp_url = f"https://wa.me/{number}?text={quote(text)}"
     available_variants = [v for v in product.variants.all() if v.in_stock]
-    context = {"product": product, "related": related, "whatsapp_url": whatsapp_url, "available_variants": available_variants}
+
+    images = [request.build_absolute_uri(img.image.url) for img in product.images.all()]
+    jsonld = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": product.name,
+        "description": product.description[:300] or product.name,
+        "url": request.build_absolute_uri(),
+        "offers": {
+            "@type": "Offer",
+            "priceCurrency": "USD",
+            "price": str(product.price_usd),
+            "availability": "https://schema.org/InStock" if available_variants else "https://schema.org/OutOfStock",
+            "url": request.build_absolute_uri(),
+        },
+    }
+    if images:
+        jsonld["image"] = images
+
+    context = {
+        "product": product,
+        "related": related,
+        "whatsapp_url": whatsapp_url,
+        "available_variants": available_variants,
+        "jsonld": _jsonld_escape(jsonld),
+        "og_image": images[0] if images else "",
+    }
     return render(request, "catalog/product_detail.html", context)

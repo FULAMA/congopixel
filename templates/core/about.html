@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}À propos - {{ site.store_name }}{% endblock %}
+{% block content %}
+<article class="prose">
+  <h1 class="section-title">À propos de {{ site.store_name }}</h1>
+  <p>{{ site.store_name }} propose des accessoires pour smartphones, avec un choix pensé pour les Google Pixel : coques, protections, chargeurs, câbles et écouteurs. Nous livrons à Kinshasa et au Kongo Central.</p>
+  <h2>Nous contacter</h2>
+  {% if whatsapp_digits %}<p><a class="btn btn-whatsapp" href="https://wa.me/{{ whatsapp_digits }}">Écrire sur WhatsApp</a></p>{% else %}<p>Notre numéro WhatsApp sera bientôt disponible.</p>{% endif %}
+  <!-- TODO propriétaire : ajouter l'adresse, les horaires et l'histoire de la boutique. -->
+</article>
+{% endblock %}

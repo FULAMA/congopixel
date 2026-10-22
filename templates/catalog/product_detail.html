@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 {% load shop %}
 {% block title %}{{ product.name }} - {{ site.store_name }}{% endblock %}
-{% block description %}{{ product.description|truncatechars:150 }}{% endblock %}
+{% block description %}{{ product.description|truncatechars:150|default:product.name }}{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block og_title %}{{ product.name }} - {{ site.store_name }}{% endblock %}
+{% block og_description %}{{ product.description|truncatechars:150|default:product.name }}{% endblock %}
+{% block og_image %}{{ og_image }}{% endblock %}
+{% block head_extra %}<script type="application/ld+json">{{ jsonld|safe }}</script>{% endblock %}
 {% block content %}
 <p class="muted"><a href="{% url 'catalog:home' %}">Accueil</a> › <a href="{% url 'catalog:category' product.category.slug %}">{{ product.category.name }}</a> › {{ product.name }}</p>
 <section class="detail">

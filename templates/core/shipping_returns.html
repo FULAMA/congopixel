@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load shop %}
+{% block title %}Livraison et retours - {{ site.store_name }}{% endblock %}
+{% block content %}
+<article class="prose">
+  <h1 class="section-title">Livraison et retours</h1>
+  <h2>Zones et frais de livraison</h2>
+  {% if zones %}
+  <ul>{% for z in zones %}<li><strong>{{ z.name }}</strong> : {{ z.fee_usd|usd }}{% if z.estimated_delay %} - délai estimé : {{ z.estimated_delay }}{% endif %}</li>{% endfor %}</ul>
+  {% endif %}
+  <p>Votre commande est préparée dès que nous avons vérifié votre paiement Orange Money ou M-Pesa. Pour le paiement à la livraison, nous vous appelons d'abord pour confirmer la commande.</p>
+  <h2>Retours et articles défectueux</h2>
+  <p>Si un article est défectueux ou ne correspond pas à votre commande, écrivez-nous{% if whatsapp_digits %} sur <a href="https://wa.me/{{ whatsapp_digits }}">WhatsApp</a>{% endif %} avec votre numéro de commande et une photo. Nous étudions chaque situation avec vous.</p>
+  <!-- TODO propriétaire : préciser le délai de retour et les conditions d'échange ou de remboursement. -->
+</article>
+{% endblock %}

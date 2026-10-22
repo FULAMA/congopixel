@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Conditions de vente - {{ site.store_name }}{% endblock %}
+{% block content %}
+<article class="prose">
+  <h1 class="section-title">Conditions de vente</h1>
+  <h2>Prix</h2>
+  <p>Les prix sont fixés en dollars américains (USD). L'équivalent en francs congolais (FC) est indicatif et calculé au taux du jour affiché sur le site. Le taux applicable à votre commande est celui du moment où vous la passez.</p>
+  <h2>Commande et paiement</h2>
+  <p>Une commande est confirmée après vérification de votre paiement Mobile Money, ou après notre appel de confirmation pour un paiement à la livraison. Les articles sont proposés dans la limite des stocks disponibles.</p>
+  <h2>Données personnelles</h2>
+  <p>Votre nom, votre téléphone et votre adresse servent uniquement à traiter et livrer votre commande et à vous contacter à son sujet.</p>
+  <h2>Contact</h2>
+  <p>Pour toute question ou réclamation, contactez-nous{% if whatsapp_digits %} sur <a href="https://wa.me/{{ whatsapp_digits }}">WhatsApp</a>{% endif %}.</p>
+  <!-- TODO propriétaire : faire relire ce texte, y ajouter la raison sociale et l'adresse de la boutique. -->
+</article>
+{% endblock %}

@@ -6,8 +6,15 @@
   <title>{% block title %}{{ site.store_name }} | Accessoires Google Pixel{% endblock %}</title>
   <meta name="description" content="{% block description %}Accessoires pour smartphones Google Pixel : coques, chargeurs, écouteurs. Livraison à Kinshasa et au Kongo Central.{% endblock %}">
   <meta name="theme-color" content="#14426C">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:site_name" content="{{ site.store_name }}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}{{ site.store_name }} | Accessoires Google Pixel{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Accessoires pour smartphones Google Pixel : coques, chargeurs, écouteurs. Livraison à Kinshasa et au Kongo Central.{% endblock %}">
+  <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/congopixel-logo.png' %}{% endblock %}">
   <link rel="icon" href="{% static 'img/congopixel-logo.png' %}">
   <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  {% block head_extra %}{% endblock %}
 </head>
 <body>
 <header class="site-header">
@@ -32,6 +39,7 @@
 <footer class="site-footer">
   <div class="container">
     <p><strong>{{ site.store_name }}</strong> - Accessoires pour Google Pixel. Livraison à Kinshasa et au Kongo Central.</p>
+    <p><a href="{% url 'core:shipping_returns' %}">Livraison et retours</a> · <a href="{% url 'core:terms' %}">Conditions de vente</a> · <a href="{% url 'core:about' %}">À propos</a></p>
     {% if whatsapp_digits %}<p>Une question ? <a href="https://wa.me/{{ whatsapp_digits }}">Écrivez-nous sur WhatsApp</a></p>{% endif %}
   </div>
 </footer>
