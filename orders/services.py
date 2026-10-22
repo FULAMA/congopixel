@@ -1,13 +1,19 @@
+import logging
+from datetime import timedelta
 from decimal import Decimal
 
+from django.conf import settings
 from django.db import transaction
 from django.db.models import F
+from django.utils import timezone
 
 from catalog.models import ProductVariant
 from core.utils import get_rate
 from payments.models import Payment
 
 from .models import Order, OrderItem
+
+logger = logging.getLogger("congopixel")
 
 
 class StockError(Exception):
@@ -60,7 +66,9 @@ def create_order(cart, data, payment_method, user=None):
     for variant, quantity, _ in items:
         ProductVariant.objects.filter(pk=variant.pk).update(stock=F("stock") - quantity)
     Payment.objects.create(order=order, method=payment_method, amount_usd=order.total_usd)
+    logger.info("Commande créée %s (%s USD, paiement %s)", order.reference, order.total_usd, payment_method)
     return order
+
 
 @transaction.atomic
 def restock_order(order):
@@ -72,4 +80,32 @@ def restock_order(order):
         ProductVariant.objects.filter(pk=item.variant_id).update(stock=F("stock") + item.quantity)
     order.stock_restored = True
     order.save(update_fields=["stock_restored", "updated_at"])
+    logger.info("Stock remis pour la commande %s", order.reference)
     return True
+
+
+def expire_stale_orders(hours=None):
+    """Annule les commandes Mobile Money sans ID de transaction au bout de N heures."""
+    hours = settings.UNPAID_ORDER_EXPIRY_HOURS if hours is None else hours
+    cutoff = timezone.now() - timedelta(hours=hours)
+    stale_ids = list(
+        Order.objects.filter(
+            status=Order.Status.PENDING_PAYMENT,
+            created_at__lt=cutoff,
+            payments__method__in=[Payment.Method.ORANGE_MONEY, Payment.Method.MPESA],
+            payments__transaction_id="",
+        ).values_list("pk", flat=True).distinct()
+    )
+    count = 0
+    for pk in stale_ids:
+        with transaction.atomic():
+            order = Order.objects.select_for_update().get(pk=pk)
+            if order.status != Order.Status.PENDING_PAYMENT:
+                continue
+            order.status = Order.Status.CANCELLED
+            order.save(update_fields=["status", "updated_at"])
+            restock_order(order)
+            count += 1
+    if count:
+        logger.info("%s commande(s) impayée(s) expirée(s)", count)
+    return count

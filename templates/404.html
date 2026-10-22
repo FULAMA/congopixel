@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}Page introuvable - {{ site.store_name }}{% endblock %}
+{% block content %}
+<div class="empty-state">
+  <h1>Oups, cette page n'existe pas</h1>
+  <p class="muted">Le lien est peut-être incorrect, ou le produit n'est plus disponible.</p>
+  <p><a class="btn btn-accent" href="{% url 'catalog:home' %}">Retour à l'accueil</a> <a class="btn" href="{% url 'catalog:product_list' %}">Voir les accessoires</a></p>
+</div>
+{% endblock %}

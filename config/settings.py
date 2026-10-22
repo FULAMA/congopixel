@@ -109,3 +109,17 @@ LOGIN_REDIRECT_URL = "accounts:account"
 LOGOUT_REDIRECT_URL = "catalog:home"
 
 ADMIN_URL = config("ADMIN_URL", default="admin/").strip("/") + "/"
+
+
+UNPAID_ORDER_EXPIRY_HOURS = config("UNPAID_ORDER_EXPIRY_HOURS", default=24, cast=int)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"simple": {"format": "%(asctime)s %(levelname)s %(name)s: %(message)s"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "simple"}},
+    "loggers": {
+        "congopixel": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        "django.security": {"handlers": ["console"], "level": "WARNING", "propagate": False},
+    },
+}

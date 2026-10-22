@@ -16,7 +16,7 @@
   {% for p in order.payments.all %}<p>{{ p.get_method_display }} - {{ p.get_status_display }}{% if p.transaction_id %} (ID : {{ p.transaction_id }}){% endif %}</p>{% endfor %}
 </div>
 
-{% for p in order.payments.all %}{% if p.method != 'cash_on_delivery' and p.status != 'confirmed' and not p.transaction_id %}
+{% for p in order.payments.all %}{% if p.method != 'cash_on_delivery' and p.status != 'confirmed' and not p.transaction_id and order.status != 'cancelled' %}
 <p><a class="btn btn-accent" href="{% url 'orders:payment' order.reference %}">Payer maintenant</a></p>
 {% endif %}{% endfor %}
 {% if whatsapp_digits %}<p><a class="btn btn-whatsapp" href="https://wa.me/{{ whatsapp_digits }}?text=Bonjour%2C%20commande%20{{ order.reference }}">Nous écrire sur WhatsApp</a></p>{% endif %}

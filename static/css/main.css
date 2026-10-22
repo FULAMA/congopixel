@@ -116,3 +116,4 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
   .js .reveal{opacity:1;transform:none}
 }
+.empty-state{text-align:center;padding:3rem 1rem}.empty-state h1{color:var(--blue)}

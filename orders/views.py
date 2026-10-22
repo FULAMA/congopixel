@@ -1,17 +1,24 @@
+import logging
+
 from django.contrib import messages
+from django.core.cache import cache
 from django.db import IntegrityError, transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 from cart.cart import Cart
 from core.models import SiteSettings
+from core.ratelimit import is_limited
 from payments.forms import MobileMoneyProofForm
 from payments.models import Payment
 
 from .access import can_view_order, remember_order
 from .forms import CheckoutForm
 from .models import Order
-from .services import StockError, create_order
+from .services import StockError, create_order, expire_stale_orders
+
+logger = logging.getLogger("congopixel")
+LIMIT_MESSAGE = "Trop de demandes en peu de temps. Réessayez dans un moment ou écrivez-nous sur WhatsApp."
 
 
 def _get_order_or_404(request, reference):
@@ -25,6 +32,9 @@ def _get_order_or_404(request, reference):
 
 
 def checkout(request):
+    if cache.add("expire_orders_check", 1, 600):
+        expire_stale_orders()
+
     cart = Cart(request)
     lines = cart.lines()
     if not lines:
@@ -41,6 +51,9 @@ def checkout(request):
     form = CheckoutForm(request.POST or None, initial=initial)
 
     if request.method == "POST" and form.is_valid():
+        if is_limited(request, "checkout", limit=5, window=3600):
+            messages.error(request, LIMIT_MESSAGE)
+            return redirect("cart:detail")
         method = form.cleaned_data["payment_method"]
         try:
             order = create_order(
@@ -67,6 +80,13 @@ def order_detail(request, reference):
 
 def order_payment(request, reference):
     order = _get_order_or_404(request, reference)
+    if order.status == Order.Status.CANCELLED:
+        messages.error(
+            request,
+            "Cette commande a été annulée ou a expiré. Écrivez-nous sur WhatsApp si vous avez déjà payé.",
+        )
+        return redirect("orders:detail", reference=order.reference)
+
     payment = order.payments.order_by("-created_at", "-id").first()
     if (
         payment is None
@@ -86,6 +106,9 @@ def order_payment(request, reference):
     if awaiting_proof:
         form = MobileMoneyProofForm(request.POST or None, payment=payment)
         if request.method == "POST" and form.is_valid():
+            if is_limited(request, "payment_proof", limit=15, window=3600):
+                messages.error(request, LIMIT_MESSAGE)
+                return redirect("orders:detail", reference=order.reference)
             payment.transaction_id = form.cleaned_data["transaction_id"]
             payment.payer_phone = form.cleaned_data["payer_phone"]
             payment.status = Payment.Status.PENDING
@@ -97,6 +120,7 @@ def order_payment(request, reference):
             else:
                 order.status = Order.Status.PAYMENT_SUBMITTED
                 order.save(update_fields=["status", "updated_at"])
+                logger.info("Preuve de paiement reçue pour %s (%s)", order.reference, payment.method)
                 messages.success(request, "Merci ! Nous vérifions votre paiement et vous contactons très vite.")
                 return redirect("orders:detail", reference=order.reference)
 
