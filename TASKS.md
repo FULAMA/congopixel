@@ -1,0 +1,13 @@
+# MISSION (dans cet ordre, une étape à la fois, avec arrêt pour validation entre chaque)
+0. Vérification : lancer les tests, `python manage.py check`, puis `check --deploy` avec DEBUG=False et SECURE_SSL_REDIRECT=False ; corriger le nécessaire ; me faire un rapport.
+1. Déploiement gratuit sur PythonAnywhere (compte gratuit, SQLite, sous-domaine pythonanywhere.com) : créer .env.example et DEPLOY.md pas à pas (clone Git, virtualenv, migrate, collectstatic, seed_initial, createsuperuser, fichier WSGI, correspondances /static/ et /media/, Force HTTPS, ADMIN_URL secret, DEBUG=False, ALLOWED_HOSTS, CSRF_TRUSTED_ORIGINS, prolongation mensuelle du compte, sauvegarde via backup_db). Ajouter une procédure pour transférer produits et photos du local vers la production (dumpdata/loaddata + copie de media).
+2. Pages de confiance : Livraison et retours, Conditions de vente, À propos et Contact, liées dans le pied de page. Contenu provisoire clairement marqué TODO pour le propriétaire.
+3. Administration : groupes de permissions (Gestionnaire de commandes, Gestionnaire du catalogue) créés par commande ou migration ; export CSV des commandes ; indicateur de stock bas ; recherches et filtres utiles ; lien WhatsApp du client sur la fiche commande.
+4. SEO et partage : sitemap.xml, robots.txt, balises Open Graph, données structurées Product, titres et descriptions par page.
+5. Performance des images : miniatures (Pillow) pour les listes et fiches, taille maximale à l'envoi, chargement différé.
+6. Internationalisation fr/en/ln : marquer les textes (gabarits et Python), sélecteur de langue, fichiers de traduction. Windows n'a pas GNU gettext : utiliser un outillage Python (par exemple polib) ou installer gettext, en justifiant ton choix. Déclarer le lingala via EXTRA_LANG_INFO. Traduire le lingala avec prudence et le marquer « à relire par un locuteur natif ».
+7. Robustesse : limitation de débit sur la saisie d'ID de transaction et sur la commande ; pages 404 et 500 aux couleurs du site ; journalisation ; cookies et sessions sécurisés.
+8. Phase 2 (conception seulement, pas d'implémentation faute d'identifiants) : interface d'adaptateur pour paiements Mobile Money automatiques (M-Pesa, Orange via un agrégateur) et pour des notifications WhatsApp ou SMS.
+
+# FORMAT DE RÉPONSE
+Pour chaque étape : plan court, fichiers modifiés, commandes de test, résultat des tests, risques. Demande ma confirmation avant l'étape suivante.
