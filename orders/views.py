@@ -20,6 +20,10 @@ from .services import StockError, expire_stale_orders, place_order
 
 logger = logging.getLogger("congopixel")
 LIMIT_MESSAGE = "Trop de demandes en peu de temps. Réessayez dans un moment ou écrivez-nous sur WhatsApp."
+STOCK_CHANGED_MESSAGE = (
+    "La quantité de certains articles a changé suite à une mise à jour du stock. "
+    "Vérifiez votre panier avant de commander."
+)
 
 
 def _get_order_or_404(request, reference):
@@ -60,9 +64,16 @@ def checkout(request):
             return _after_checkout(replay)
 
     cart = Cart(request)
+    if request.method == "GET":
+        cart.sync()
     lines = cart.lines()
     if not lines:
         messages.info(request, "Votre panier est vide.")
+        return redirect("cart:detail")
+
+    if request.method == "POST" and sum(line.quantity for line in lines) != cart.count:
+        cart.sync()
+        messages.warning(request, STOCK_CHANGED_MESSAGE)
         return redirect("cart:detail")
 
     initial = {"idempotency_key": uuid.uuid4()}

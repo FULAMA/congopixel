@@ -62,6 +62,15 @@ class Cart:
             self._lines = lines
         return self._lines
 
+    def sync(self):
+        """Recale le panier sur le stock réel ; retourne True si quelque chose a changé."""
+        cleaned = {str(line.variant.pk): line.quantity for line in self.lines()}
+        changed = cleaned != self._data
+        if changed:
+            self._data = cleaned
+            self._save()
+        return changed
+
     @property
     def subtotal(self):
         return sum((line.total for line in self.lines()), Decimal("0.00"))

@@ -25,6 +25,8 @@ def _quantity_from_post(request):
 
 def cart_detail(request):
     cart = Cart(request)
+    if cart.sync():
+        messages.warning(request, "Certaines quantités ont été ajustées au stock disponible.")
     return render(request, "cart/detail.html", {"lines": cart.lines(), "subtotal": cart.subtotal})
 
 
