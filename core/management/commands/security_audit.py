@@ -20,6 +20,19 @@ class Command(BaseCommand):
         if settings.ADMIN_URL == "admin/":
             findings.append(("AVERTISSEMENT", "L'adresse de l'admin est celle par défaut (ADMIN_URL)."))
 
+        if not getattr(settings, "ADMIN_2FA", False):
+            findings.append(("AVERTISSEMENT", "La double authentification de l'admin n'est pas activée (ADMIN_2FA)."))
+
+        from django_otp.plugins.otp_totp.models import TOTPDevice
+
+        protected = set(TOTPDevice.objects.filter(confirmed=True).values_list("user__username", flat=True))
+        unprotected = [
+            name for name in User.objects.filter(is_staff=True, is_active=True).values_list("username", flat=True)
+            if name not in protected
+        ]
+        if unprotected:
+            findings.append(("AVERTISSEMENT", f"Comptes équipe sans 2FA : {', '.join(unprotected)}."))
+
         superusers = list(
             User.objects.filter(is_superuser=True, is_active=True).values_list("username", flat=True)
         )

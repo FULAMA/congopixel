@@ -4,7 +4,10 @@ from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 
+from core.admin_2fa import apply_admin_2fa
 from core.sitemaps import SITEMAPS
+
+apply_admin_2fa(admin.site, settings.ADMIN_2FA)
 
 urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),

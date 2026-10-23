@@ -27,3 +27,13 @@ def production_hardening_check(app_configs, **kwargs):
             hint="Ajoutez https://votre-domaine dans le .env de production.", id="congopixel.W002",
         ))
     return problems
+
+@register(deploy=True)
+def two_factor_check(app_configs, **kwargs):
+    if getattr(settings, "ADMIN_2FA", False):
+        return []
+    return [Warning(
+        "La double authentification de l'admin n'est pas activée.",
+        hint="Créez un appareil avec « python manage.py setup_2fa NOM », puis ajoutez ADMIN_2FA=True au .env.",
+        id="congopixel.W003",
+    )]
