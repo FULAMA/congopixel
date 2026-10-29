@@ -112,6 +112,11 @@ class ProductVariant(models.Model):
         help_text="Laisser vide pour utiliser le prix du produit.",
     )
     stock = models.PositiveIntegerField("stock", default=0)
+    low_stock_threshold = models.PositiveIntegerField(
+        "seuil de stock bas",
+        default=3,
+        help_text="Alerte lorsque le stock disponible est inférieur ou égal à ce seuil.",
+    )
     is_active = models.BooleanField("active", default=True)
 
     class Meta:
