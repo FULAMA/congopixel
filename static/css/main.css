@@ -119,3 +119,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .empty-state{text-align:center;padding:3rem 1rem}.empty-state h1{color:var(--blue)}
 
 .qr{border:1px solid var(--line);border-radius:12px;background:#fff;padding:.5rem;max-width:100%;height:auto}
+
+
+/* Order tracking: compact, responsive progress indicator. */
+.order-tracking{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:1rem;margin:1rem 0 1.5rem}
+.order-tracking h2{margin:.1rem 0 1rem;font-size:1.15rem}
+.order-tracking__steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5rem;list-style:none;padding:0;margin:0}
+.order-tracking__steps li{display:flex;flex-direction:column;align-items:center;gap:.45rem;text-align:center;color:var(--muted);font-size:.82rem;min-width:0}
+.order-tracking__steps li span{display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:#E2E8F0;color:#475569;font-weight:700}
+.order-tracking__steps li.is-complete span,.order-tracking__steps li.is-current span{background:var(--blue);color:#fff}
+.order-tracking__steps li.is-current strong{color:var(--blue)}
+.order-cancelled{padding:.75rem 1rem;border-radius:10px;background:#FEF2F2;color:#991B1B}
+@media(max-width:520px){.order-tracking{padding:.8rem}.order-tracking__steps{gap:.2rem}.order-tracking__steps li{font-size:.7rem}.order-tracking__steps li span{width:1.7rem;height:1.7rem}}
